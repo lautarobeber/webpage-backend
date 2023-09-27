@@ -5,6 +5,7 @@ import cors from 'cors'
 
 import authRoutes from "./routes/auth.routes.js";
 import productsRoutes from "./routes/products.routes.js"
+import paymentRoutes from './routes/payment.routes.js'
 
 const app = express();
 
@@ -15,7 +16,9 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/public', express.static('src/uploads'))
 app.use('/api', authRoutes);
 app.use('/api', productsRoutes);
+app.use('/api', paymentRoutes);
 
 export default app

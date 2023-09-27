@@ -7,11 +7,12 @@ import upload from "../libs/storage.js";
 
 const router = Router()
 
-router.get('/products', authRequired, getProducts);
-router.get('/products/:id', authRequired, getProduct);
-router.post('/products', authRequired, validateSchema(productSchema), upload.single('image'), addProducts);
+router.get('/products',  getProducts);
+router.get('/products/:id', getProduct);
+router.post('/products', authRequired,  upload.single('src'), addProducts);
 router.put('/products/:id', authRequired, updateProducts);
 router.delete('/products/:id', authRequired, deleteProducts);
+
 
 
 export default router;

@@ -24,7 +24,7 @@ const productSchema = new mongoose.Schema(
     },
     src: {
       type: String,
-      required: true,
+    
       trim: true
     },
     stock: {
@@ -37,5 +37,9 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+productSchema.methods.setImgUrl = function setImgUrl (filename) {
+  this.src = `http://localhost:4000/public/${filename}`
+}
 
 export default mongoose.model("Product", productSchema);
