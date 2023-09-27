@@ -1,15 +1,19 @@
 import multer from "multer";
+import path from 'path'
+import { v4 as uuidv4 } from 'uuid';
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, '../storage/img')
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null, `${file.fieldname}-${uniqueSuffix}`)
-    }
-  })
-  
-  const upload = multer({ storage })
+  destination: "src/uploads",
+  filename: function (req, file, cb) {
+    cb(null, uuidv4() + path.extname(file.originalname));
+  },
+});
 
-  export default upload;
+const upload = multer({
+  storage,
+  dest: "src/uploads",
+  limits: { fileSize: 2000000 },
+ 
+});
+
+export default upload;
