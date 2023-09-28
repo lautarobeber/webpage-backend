@@ -2,25 +2,19 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
 
-    order_id: {
+    
+    user: {
         type: String,
         required: true,
         trim: true,
     },
-    user: {
-
+  
+    product: {
+        type: String,
+        required: true,
+        trim: true,
     },
     amount: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    province: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    city: {
         type: String,
         required: true,
         trim: true,
@@ -30,10 +24,14 @@ const orderSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    shipping: {
-        type: String,
+    quantity: {
+        type: Number,
         required: true,
-        trim: true,
+    },
+    shipping: {
+        type: Boolean,
+        required: true,
+        
     }
 
 
