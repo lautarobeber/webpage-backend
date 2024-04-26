@@ -1,126 +1,183 @@
-import User from '../models/user.model.js'
-import bcrypt from 'bcryptjs'
-import { createAccessToken } from '../libs/jwt.js'
-import jwt from 'jsonwebtoken'
-import { TOKEN_SECRET } from '../config.js'
+import bcrypt from "bcryptjs";
+import { createAccessToken } from "../libs/jwt.js";
+import jwt from "jsonwebtoken";
+import { TOKEN_SECRET } from "../config.js";
+import { User } from "../models/sql_models/users.model.js";
+import { Cart } from "../models/sql_models/cart.model.js";
 
-export const register = async (req, res) => 
-{
+export const register = async (req, res) => {
+  const { email, name, surname, password } = req.body;
+  if(!email) return res.status(400).send({ error: 'Email is required' });
+  try {
+    const userFound = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+    if (userFound) return res.status(400).json(["the email is already in use"]);
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = User.create({
+      email: email,
+      firstName: name,
+      lastName: surname,
+      password: passwordHash,
+    });
 
-    const {username, email, password} = req.body
+    const cartFound = await Cart.findOne({
+      where: {
+        id_user: email,
+      },
+    });
 
-  try{
-
-    const userFound = await User.findOne({email});
-    if (userFound) return res.status(400).json(['the email is already in use'])   
-    const passwordHash = await bcrypt.hash(password, 10)
-    const newUser = new User({
-        username,
-        email,
-        password: passwordHash
-    })
-
-    
-    const userSaved = await newUser.save();
-
-    const token = await createAccessToken({id: userSaved._id});
-
-    
-
-    res.cookie('token', token)
-     res.json({
-        id: userSaved._id,
-        username: userSaved.username,
-        email: userSaved.email,
-        createdAt: userSaved.createdAt,
-        updatedAt: userSaved.updatedAt,
-    })  
-  }catch (error) {
-    res.status(500).json({message: error.message})
-  }
-   
-}
-
-export const login = async (req, res) => 
-{
-    const {email, password} = req.body
-
-  try{
-
-    const userFound = await User.findOne({email})
-    if(!userFound){
-        return res.status(400).json({message: 'User not found'})
+    if (cartFound){
+      console.log("Se encontró un carrito ya para este usuario");
+      return res.status(400).json(['este usuario ya tiene carrito'])
+    }else{
+      await Cart.create({
+        id_user: email,
+      });
     }
+      
 
-//devuelve true o false
-    const isMatch = await bcrypt.compare(password, userFound.password)
+   
 
-    if(!isMatch){
-        return res.status(400).json({message:'Invalid password'});
+    /* const userSaved = await newUser.save(); */
+
+    const token = await createAccessToken({ email: newUser.email });
+
+    res.cookie("token", token);
+    res.json({
+      name: newUser.name,
+      email: newUser.email,
+      message: "successful registration!",
+      /*  createdAt: newUser.createdAt,
+        updatedAt: newUser.updatedAt, */
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  if(!email) return res.status(500).json({message: 'internal server error'})
+  
+  
+  try {
+    const userFound = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+    if (!userFound) {
+      return res.status(400).json({ message: "User not found" });
     }
     
-
-    const token = await createAccessToken({id: userFound._id});
-
+    //devuelve true o false
+    const isMatch = await bcrypt.compare(password, userFound.password);
     
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    
+    const token = await createAccessToken({ email: userFound.email });
+    
+  
 
-    res.cookie('token', token)
-     res.json({
-        id: userFound._id,
-        username: userFound.username,
-        email: userFound.email,
-        createdAt: userFound.createdAt,
-        updatedAt: userFound.updatedAt,
-    })  
-  }catch (error) {
-    res.status(500).json({message: error.message})
+    res.cookie("token", token);
+    res.json({
+      
+
+      email: userFound.email,
+      /*   createdAt: userFound.createdAt,
+        updatedAt: userFound.updatedAt, */
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-   
-}
+};
 
-export const logout = (req, res) =>{
-
- res.cookie('token', '',{
-  expires: new Date(0)
- })
- return res.sendStatus(200);
-
-}
+export const logout = (req, res) => {
+  res.cookie("token", "", {
+    expires: new Date(0),
+  });
+  return res.sendStatus(200);
+};
 
 export const profile = async (req, res) => {
-const userFound = await User.findById(req.user.id);
 
+  try{
 
-if(!userFound) return res.status(400).json({message: 'profile not found'})
-
-
-return res.json({
-  id: userFound._id,
-  username: userFound.username,
-  email: userFound.email,
-  createdAt: userFound.createdAt,
-  updatedAt: userFound.updatedAt,
-})  
-
-}
-
-export const verifyToken = async (req, res) =>{
-
- const {token} =  req.cookies
-
- if(!token ) return res.status(401).json({message: 'not authorized'})
-
- jwt.verify(token, TOKEN_SECRET, async (err, user) =>{
-  if (err) return res.status(401).json({message: 'not authorized'})
-
-  const userFound = await User.findById(user.id)
-  if (!userFound) return res.status(401).json({message: 'not authorized'})
-
-  return res.json({
+    const userFound = await User.findById(req.user.id);
+    
+    if (!userFound) return res.status(400).json({ message: "profile not found" });
+    
+    return res.json({
     id: userFound._id,
     username: userFound.username,
     email: userFound.email,
-  })
+    createdAt: userFound.createdAt,
+    updatedAt: userFound.updatedAt,
+  });
+}catch(e){
+  console.log(e);
+  return res.status(500).json({message:"Server Error"});
+}
+};
 
- } )
+export const verifyToken = async (req, res) => {
+  console.log(req.body);
+  const { token } = req.cookies;
+
+ 
+  if (!token) return res.status(401).json({ message: "not authorized" });
+  try{
+
+
+  jwt.verify(token, TOKEN_SECRET, async (err, user) => {
+    if (err) return res.status(401).json({ message: "not authorized" });
+    console.log(user, "aca");
+    const userFound = await User.findOne({
+      where: {
+        email: user?.email,
+      },
+    });
+    if (!userFound) return res.status(401).json({ message: "not authorized" });
+
+    return res.json({
+      id: userFound._id,
+      username: userFound.username,
+      email: userFound.email,
+      admin: userFound.admin
+    });
+  });
+}catch(e){
+    return res.status(500).send("Server error")
+}
+};
+
+
+export const setAdmin = async (req, res) => {
+  const {email} = req.body
+  if(!email){
+    return res.status(500).json({message: "Internal Server Error"})
+  }
+  try{
+    const userFound = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if(!userFound) return res.status(404).json({message: 'User not found'})
+
+   
+    //update user
+    await userFound.update({ admin: true });
+
+    res.status(200).json({ message: 'User updated successfully', user: userFound });
+
+  }catch (error) {
+    console.error('Error al actualizar usuario:', error);
+  }
 }

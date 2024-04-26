@@ -5,6 +5,7 @@ import {
   logout,
   profile,
   verifyToken,
+  setAdmin
 } from "../controllers/auth.controllers.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -19,6 +20,8 @@ router.post("/login",validateSchema(loginSchema), login);
 router.post("/logout", logout);
 
 router.get("/profile", authRequired, profile);
+
+router.patch("/setadmin", authRequired, setAdmin);
 
 router.get('/auth/verify-token', verifyToken)
 

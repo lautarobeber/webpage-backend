@@ -1,4 +1,4 @@
-import mercadopago from "mercadopago";
+/* import mercadopago from "mercadopago";
 import Order from '../models/order.model.js' 
 
 export const createOrder = async (req, res) => {
@@ -28,7 +28,7 @@ export const createOrder = async (req, res) => {
       pending: "http://localhost:5173/succes",
       failure: "",
     },
-    notification_url: "https://c080-181-85-126-56.ngrok-free.app/api/succes",
+    notification_url: "https://fefd-181-85-126-56.ngrok-free.app/api/succes",
     auto_return: "approved",
   };
 
@@ -95,4 +95,4 @@ export const getOrders = async (req, res) =>{
 
   const orders = await Order.find()
   res.json(orders);
-}
+} */

@@ -5,14 +5,21 @@ import { validateSchema } from "../middlewares/validator.middleware.js";
 import { productSchema } from "../schemas/product.schema.js";
 import upload from "../libs/storage.js";
 
+/* import User from "../models/sql_models/users.model.js"; */
+
 const router = Router()
 
 router.get('/products',  getProducts);
 router.get('/products/:id', getProduct);
-router.post('/products', authRequired,  upload.single('src'), addProducts);
+router.post('/products', authRequired, upload.single('src'), addProducts);
 router.put('/products/:id', authRequired, updateProducts);
 router.delete('/products/:id', authRequired, deleteProducts);
 
+
+/* router.get('/test', (req, res) => {
+    const result = User.findAll();
+})
+ */
 
 
 export default router;

@@ -20,11 +20,14 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^1.5.17",
-    "mongoose": "^7.5.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.9.2",
     "ngrok": "^5.0.0-beta.2",
     "nodemon": "^3.0.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.1",
+    "stripe": "^14.19.0",
     "uuid": "^9.0.1",
     "zod": "^3.22.2"
   }
