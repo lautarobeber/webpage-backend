@@ -18,6 +18,8 @@ let singleShop = {};
 export const createSession = async (req, res) => {
   const data = req.body;
   console.log(data);
+try{
+
 
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -34,8 +36,8 @@ export const createSession = async (req, res) => {
       },
     ],
     mode: "payment",
-    success_url: "http://localhost:5173/succes",
-    cancel_url: "http://localhost:5173/products",
+    success_url: `${PORT}/succes`,
+      cancel_url: `${PORT}/products`,
   });
   temporaryOrderData = {
     email: data.user,
@@ -82,6 +84,10 @@ export const createSession = async (req, res) => {
       id_user: data.user,
        */
   return res.json(session);
+
+}catch(e){
+  return res.status(500).json({message: e.message})
+}
 };
 export const createSessionFromCart = async (req, res) => {
   const data = req.body;
@@ -128,8 +134,8 @@ export const createSessionFromCart = async (req, res) => {
         quantity: product.quantity || 1,
       })),
       mode: "payment",
-      success_url: "http://localhost:5173/succes",
-      cancel_url: "http://localhost:5173/products",
+      success_url: `${PORT}/succes`,
+      cancel_url: `${PORT}/products`,
     });
 
     temporaryOrderData = {
