@@ -46,6 +46,7 @@ app.use('/register', express.static('dist'));
 app.use('/login', express.static('dist'));
 app.use('/order', express.static('dist'));
 app.use('/orderCart', express.static('dist'));
+app.use('/myShopping', express.static('dist'));
 app.use('/succes', express.static('dist'));
 app.use('/admin', express.static('dist'));
 app.use('/admin/products', express.static('dist'));
