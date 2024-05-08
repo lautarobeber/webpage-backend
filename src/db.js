@@ -6,7 +6,10 @@ const userDB = process.env.USER_DB
 const nameDB = process.env.NAME_DB
 const passwordDB = process.env.PASSWORD_DB
 
-export const sequelize = new Sequelize(nameDB, userDB , passwordDB, {
+/* export const sequelize = new Sequelize(nameDB, userDB , passwordDB, {
   host: process.env.HOST_DB,
   dialect: "mysql",
 });
+ */
+
+export const sequelize = new Sequelize('mysql://root:ZYaQxhYfhcfRiTwBAtwosEhJCvZNjLZt@roundhouse.proxy.rlwy.net:30294/railway');
