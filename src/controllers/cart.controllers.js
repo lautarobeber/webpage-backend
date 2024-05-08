@@ -1,4 +1,3 @@
-
 import { sequelize } from "../db.js";
 import { Cart } from "../models/sql_models/cart.model.js";
 import Product_Cart from "../models/sql_models/product_cart.model.js";
@@ -22,9 +21,9 @@ export const createCart = async (req, res) => {
 
 export const addProductToCart = async (req, res) => {
   const { quantity, id_product, sizes } = req.body.product;
-  const sizesAvailables = JSON.parse(sizes)
+  const sizesAvailables = JSON.parse(sizes);
   const { email } = req.body.user;
-  console.log(req.body, sizesAvailables)
+  console.log('aca antes')
 
   try {
     const cartFound = await Cart.findOne({
@@ -32,22 +31,32 @@ export const addProductToCart = async (req, res) => {
         id_user: email,
       },
     });
-    console.log(cartFound);
+    console.log(cartFound, 'aca');
     if (!cartFound) {
-      return res
-        .status(404)
-        .json({
-          message: "No se encontró el carrito que contiene este producto",
-        });
+      return res.status(404).json({
+        message: "No se encontró el carrito que contiene este producto",
+      });
     }
     const productInCart = await Product_Cart.findOne({
-      where:{
-        id_product : id_product
-      }
-    })
+      where: {
+        id_product: id_product,
+      },
+    });
 
-    if(productInCart) {
-      
+    if (productInCart) {
+      await Product_Cart.update(
+        {
+          quantity: sequelize.literal("quantity + 1"), // Incrementa el valor actual en 1
+        },
+        {
+          where: {
+            id_cart: cartFound.id_cart,
+            id_product: productInCart.id_product,
+          }, // Filtro para actualizar el registro específico
+        }
+      );
+
+      return res.status(201).send("Se agregaron unidades al producto");
     }
     const newProductCart = await Product_Cart.create({
       quantity: parseInt(quantity) || 1,
@@ -76,11 +85,9 @@ export const getProductsByCart = async (req, res) => {
     });
 
     if (!cartFound) {
-      return res
-        .status(404)
-        .json({
-          message: "No se encontró el carrito que contiene este producto",
-        });
+      return res.status(404).json({
+        message: "No se encontró el carrito que contiene este producto",
+      });
     }
     const productsByCarts = await Product_Cart.findAll({
       where: {
@@ -93,7 +100,7 @@ export const getProductsByCart = async (req, res) => {
         },
       ],
     });
-    console.log(productsByCarts);
+    
     return res.json(productsByCarts);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -102,14 +109,14 @@ export const getProductsByCart = async (req, res) => {
 
 export const deleteOneProductFromCart = async (req, res) => {
   const { id, email } = req.params;
-  console.log(req.params);
+ 
   try {
     const cartFound = await Cart.findOne({
       where: {
         id_user: email,
       },
     });
-    console.log(cartFound);
+   
     await Product_Cart.destroy({
       where: {
         id_cart: cartFound.id_cart,
@@ -117,12 +124,10 @@ export const deleteOneProductFromCart = async (req, res) => {
       },
     });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Producto eliminado del carrito correctamente",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Producto eliminado del carrito correctamente",
+    });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -130,29 +135,33 @@ export const deleteOneProductFromCart = async (req, res) => {
 
 export const deleteAllProductsFromCart = async (req, res) => {};
 export const quantityCart = async (req, res) => {
-  const { user, action} = req.body;
+  const { user, action } = req.body;
 
   if (action !== "increment" && action !== "decrement") {
-    return res.status(400).json({ message: "El parámetro 'action' debe ser 'increment' o 'decrement'" });
+    return res.status(400).json({
+      message: "El parámetro 'action' debe ser 'increment' o 'decrement'",
+    });
   }
 
   try {
-    let idCartFound = await Cart.findOne(
-      { 
-        where: { id_user: user },
-      
-      });
-     
-      if(!idCartFound) return res.status(404).json({message: "Internal Server Error"})
+    let idCartFound = await Cart.findOne({
+      where: { id_user: user },
+    });
 
-      const productCart = await Product_Cart.findOne({ where: { id_cart: idCartFound.id_cart } });
+    if (!idCartFound)
+      return res.status(404).json({ message: "Internal Server Error" });
 
-      if (!productCart) {
-        return res.status(404).json({ message: "Producto no encontrado en el carrito" });
-      }
-  
+    const productCart = await Product_Cart.findOne({
+      where: { id_cart: idCartFound.id_cart },
+    });
 
-      let newQuantity;
+    if (!productCart) {
+      return res
+        .status(404)
+        .json({ message: "Producto no encontrado en el carrito" });
+    }
+
+    let newQuantity;
 
     // Determina el valor a agregar o restar
     if (action === "increment") {
@@ -160,7 +169,9 @@ export const quantityCart = async (req, res) => {
     } else if (action === "decrement") {
       // Verifica que la cantidad no sea 1 antes de decrementar
       if (productCart.quantity === 1) {
-        return res.status(400).json({ message: "La cantidad mínima permitida es 1" });
+        return res
+          .status(400)
+          .json({ message: "La cantidad mínima permitida es 1" });
       }
       newQuantity = productCart.quantity - 1;
     }
@@ -171,39 +182,45 @@ export const quantityCart = async (req, res) => {
       { where: { id_cart: idCartFound.id_cart } }
     );
 
+    const message =
+      action === "increment"
+        ? "Cantidad incrementada correctamente"
+        : "Cantidad decrementada correctamente";
 
-      const message = action === "increment" ? "Cantidad incrementada correctamente" : "Cantidad decrementada correctamente";
-
-      return res.status(200).json({ message: message });
-
+    return res.status(200).json({ message: message });
   } catch (e) {
     return res.status(500).json(e.message);
   }
 };
-export const setSizeProductsByID  = async (req, res) => {
-  console.log(req.body)
+export const setSizeProductsByID = async (req, res) => {
+  
   const { id_product } = req.params;
-  const {sizeSelected } = req.body
+  const { sizeSelected } = req.body;
 
-  if(!id_product) return res.status(404).json({message: 'No se ha proporcionado un ID'});
-  if(!sizeSelected) return res.status(404).json({message: 'No se ha proporcionado un talle'});
+  if (!id_product)
+    return res.status(404).json({ message: "No se ha proporcionado un ID" });
+  if (!sizeSelected)
+    return res.status(404).json({ message: "No se ha proporcionado un talle" });
 
-  try{
-
-    const productFound =  await Product.findOne({where:{id_product : id_product}}) ;
-    if(!productFound) return res.status(404).json({message: 'Producto no encontrado'});
-    await Product_Cart.update({
-      size: sizeSelected
-    },
-    {
-      where: {
-        id_product:  productFound.id_product ,
+  try {
+    const productFound = await Product.findOne({
+      where: { id_product: id_product },
+    });
+    if (!productFound)
+      return res.status(404).json({ message: "Producto no encontrado" });
+    await Product_Cart.update(
+      {
+        size: sizeSelected,
+      },
+      {
+        where: {
+          id_product: productFound.id_product,
+        },
       }
-    }
-  )
+    );
 
-  return res.status(201).json({message: 'Size cambiado'})
-  }catch(e){
+    return res.status(201).json({ message: "Size cambiado" });
+  } catch (e) {
     return res.status(500).json(e.message);
   }
 };

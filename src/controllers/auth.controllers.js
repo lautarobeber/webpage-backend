@@ -7,16 +7,16 @@ import { Cart } from "../models/sql_models/cart.model.js";
 
 export const register = async (req, res) => {
   const { email, name, surname, password } = req.body;
-  if(!email) return res.status(400).send({ error: 'Email is required' });
+  if(!email) return res.status(400).send(['El email es requerido' ]);
   try {
     const userFound = await User.findOne({
       where: {
         email: email,
       },
     });
-    if (userFound) return res.status(400).json(["the email is already in use"]);
+    if (userFound) return res.status(400).json(["El email ya esta en uso"]);
     const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = User.create({
+    const newUser = await User.create({
       email: email,
       firstName: name,
       lastName: surname,
@@ -47,20 +47,22 @@ export const register = async (req, res) => {
 
     res.cookie("token", token);
     res.json({
-      name: newUser.name,
+      name: newUser.firstName,
       email: newUser.email,
       message: "successful registration!",
       /*  createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt, */
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json([error.message ]);
   }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  if(!email) return res.status(500).json({message: 'internal server error'})
+
+
+  if(!email) return res.status(500).json(['internal server error'])
   
   
   try {
@@ -70,14 +72,14 @@ export const login = async (req, res) => {
       },
     });
     if (!userFound) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json(["Usuario no encontrado" ]);
     }
     
     //devuelve true o false
     const isMatch = await bcrypt.compare(password, userFound.password);
     
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid password" });
+      return res.status(400).json(["Contraseña incorrecta"]);
     }
     
     const token = await createAccessToken({ email: userFound.email });
@@ -89,11 +91,10 @@ export const login = async (req, res) => {
       
 
       email: userFound.email,
-      /*   createdAt: userFound.createdAt,
-        updatedAt: userFound.updatedAt, */
+      name: userFound.firstName
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json([error.message] );
   }
 };
 
@@ -114,7 +115,8 @@ export const profile = async (req, res) => {
     
     return res.json({
     id: userFound._id,
-    username: userFound.username,
+    username: userFound.firstName,
+    surname: userFound.lastName,
     email: userFound.email,
     createdAt: userFound.createdAt,
     updatedAt: userFound.updatedAt,
@@ -126,7 +128,7 @@ export const profile = async (req, res) => {
 };
 
 export const verifyToken = async (req, res) => {
-  console.log(req.body);
+
   const { token } = req.cookies;
 
  
@@ -136,7 +138,7 @@ export const verifyToken = async (req, res) => {
 
   jwt.verify(token, TOKEN_SECRET, async (err, user) => {
     if (err) return res.status(401).json({ message: "not authorized" });
-    console.log(user, "aca");
+   
     const userFound = await User.findOne({
       where: {
         email: user?.email,
@@ -145,8 +147,9 @@ export const verifyToken = async (req, res) => {
     if (!userFound) return res.status(401).json({ message: "not authorized" });
 
     return res.json({
-      id: userFound._id,
-      username: userFound.username,
+      /* id: userFound._id, */
+      name: userFound.firstName,
+      surname: userFound.lastName,
       email: userFound.email,
       admin: userFound.admin
     });

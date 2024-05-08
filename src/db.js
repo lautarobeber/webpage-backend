@@ -2,20 +2,10 @@
 import Sequelize from "sequelize";
 
 
+const userDB = process.env.USER_DB
+const nameDB = process.env.NAME_DB
 
-
-export const sequelize = new Sequelize("test", "root", "", {
-  host: process.env.APP_HOST,
+export const sequelize = new Sequelize(nameDB, userDB , "", {
+  host: process.env.HOST_DB,
   dialect: "mysql",
 });
-/* 
-export const connectMySQL = async () => {
-  try {
-    await sequelize.authenticate( );
-    await sequelize.sync({});
-    console.log("Connection MYSQL has been established successfully.");
-  } catch (error) {
-    console.error("Unable to connect MYSQL to the database:", error);
-  }
-};
- */

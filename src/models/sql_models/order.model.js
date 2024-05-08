@@ -58,7 +58,27 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       
-    }
+    },
+    user_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      
+    },
+    user_surname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      
+    },
+    deliveryDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      
+    },
   },
   {
     timestamps: false

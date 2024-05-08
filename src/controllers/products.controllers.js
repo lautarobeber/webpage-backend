@@ -22,7 +22,7 @@ export const getProducts = async (req, res) => {
 };
 
 export const addProducts = async (req, res) => {
-  console.log(req.body,'req.body product');
+  
 
   try {
     const { name, category, price, desc, sizes } = req.body;
@@ -96,6 +96,20 @@ export const deleteProducts = async (req, res) => {
   try {
     await Product.destroy({ where: { id_product: id } });
     res.status(204).json({ message: "Successfully deleted the product" });
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+
+export const deleteByCatID = async (req, res) => {
+ 
+  const { id_category} = req.body;
+ 
+  try {
+    
+    await Product.destroy({ where: { id_category: id_category } });
+    res.status(200).json({ message: "Successfully deleted the products" });
   } catch (e) {
     return res.status(500).json({ message: e.message });
   }

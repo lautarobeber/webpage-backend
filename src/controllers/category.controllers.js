@@ -30,8 +30,8 @@ export const addCategory = async (req, res) => {
   }
 };
 
-export const deleteCategory = async (req, res) => {
-  const { id } = req.body;
+export const deleteOneCategory = async (req, res) => {
+  const { id } = req.params;
   if (!id) {
     return res.status(404).json({ message: "Category not found" });
   }
