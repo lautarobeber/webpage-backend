@@ -8,8 +8,8 @@ import Product_Cart from "../models/sql_models/product_cart.model.js";
 import { Product } from "../models/sql_models/products.model.js";
 import { sequelize } from "../db.js";
 import { Order_Product } from "../models/sql_models/order_product.model.js";
-const PORT = process.env.PORT
 const stripe = new Stripe(SECRET_KEY_STRIPE);
+const PORT = process.env.APP_HOST
 
 let temporaryOrderData = {};
 let producstInCart = {};
