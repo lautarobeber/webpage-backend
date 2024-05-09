@@ -14,4 +14,4 @@ const portDB = process.env.PORT_DB
 });
  */
 
-export const sequelize = new Sequelize(`mysql://${userDB}:${passwordDB}@${hostDB}:${portDB}/railway`);
+export const sequelize = new Sequelize(`mysql://root:ZYaQxhYfhcfRiTwBAtwosEhJCvZNjLZt@roundhouse.proxy.rlwy.net:30294/railway`);
